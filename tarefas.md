@@ -31,7 +31,7 @@ Cada dupla deve produzir uma aplicação executável no terminal que atenda aos 
 
 ---
 
-## 2. Trabalho 1 — Gestão de Feriados Nacionais
+## Trabalho 1 — Gestão de Feriados Nacionais
 **Biblioteca-tempero:** `python-dateutil`  
 **API sugerida:** `https://brasilapi.com.br/api/feriados/v1/{ano}`
 
@@ -75,7 +75,7 @@ Aplicação terminal que consulta feriados nacionais, armazena localmente e perm
 
 ---
 
-## 3. Trabalho 2 — Validação e Formatação de Telefones Brasileiros
+## Trabalho 2 — Validação e Formatação de Telefones Brasileiros
 **Biblioteca-tempero:** `phonenumbers`  
 **API sugerida:** `https://brasilapi.com.br/api/ddd/v1/{ddd}`
 
@@ -122,7 +122,7 @@ Aplicação que valida, formata e enriquece números de telefone brasileiros. A 
 
 ---
 
-## 4. Trabalho 3 — Slug e Normalização de Instituições Financeiras
+## Trabalho 3 — Slug e Normalização de Instituições Financeiras
 **Biblioteca-tempero:** `python-slugify`  
 **API sugerida:** `https://brasilapi.com.br/api/cvm/corretoras/v1`
 
@@ -165,7 +165,7 @@ Aplicação que consulta a lista de corretoras de valores, normaliza seus nomes 
 
 ---
 
-## 5. Trabalho 4 — QR Code de Endereços
+## Trabalho 4 — QR Code de Endereços
 **Biblioteca-tempero:** `qrcode`  
 **API sugerida:** `https://viacep.com.br/ws/{cep}/json/`
 
@@ -209,7 +209,7 @@ Aplicação que consulta endereços pelo CEP e gera QR Codes contendo os dados e
 
 ---
 
-## 6. Trabalho 5 — Geocodificação de Municípios Brasileiros
+## Trabalho 5 — Geocodificação de Municípios Brasileiros
 **Biblioteca-tempero:** `geopy`  
 **API sugerida:** `https://servicodados.ibge.gov.br/api/v1/localidades/municipios` (para obter lista) + geocodificador Nominatim
 
@@ -253,9 +253,8 @@ Aplicação que obtém municípios brasileiros via IBGE, geocodifica para latitu
 
 ---
 
-## 7. Trabalho 6 — Estatísticas de Nomes e Frequência
+## Trabalho 6 — Estatísticas de Nomes e Frequência
 **Biblioteca-tempero:** `humanize`  
-**API sugerida:** `https://servicodados.ibge.gov.br/api/v2/censos/nomes/{nome}`
 
 ### Descrição geral
 Aplicação que consulta a frequência histórica de nomes no censo brasileiro (IBGE) e usa `humanize` para apresentar números de forma amigável e natural (ex: "15,2 mil", "1,2 milhão").
@@ -298,7 +297,7 @@ Aplicação que consulta a frequência histórica de nomes no censo brasileiro (
 
 ---
 
-## 8. Trabalho 7 — Relatório de Câmbio com Templates
+## Trabalho 7 — Relatório de Câmbio com Templates
 **Biblioteca-tempero:** `jinja2`  
 **API sugerida:** `https://brasilapi.com.br/api/cambio/v1/cotacao` (ou endpoint de moedas/câmbio disponível)
 
@@ -343,7 +342,7 @@ Aplicação que consulta cotações de moedas e usa `jinja2` para renderizar tem
 
 ---
 
-## 9. Trabalho 8 — Busca Aproximada em Instituições Bancárias
+## Trabalho 8 — Busca Aproximada em Instituições Bancárias
 **Biblioteca-tempero:** `thefuzz`  
 **API sugerida:** `https://brasilapi.com.br/api/banks/v1`
 
