@@ -382,6 +382,222 @@ Aplicação que consulta a lista de bancos brasileiros e permite buscas por apro
 - Criar um "quiz" de reconhecimento: o sistema mostra um nome intencionalmente distorcido de um banco e o usuário deve adivinhar qual é; o sistema usa a biblioteca-tempero para verificar se o palpite está próximo o suficiente do nome correto.
 - Exportar um dicionário de sinônimos: pares de nomes de bancos que apresentam score maior que 90, salvos em um arquivo de texto.
 
+
+## 1. Requisitos Técnicos Gerais (obrigatórios para todos os trabalhos)
+
+Cada dupla deve produzir uma aplicação executável no terminal que atenda aos seguintes requisitos estruturais:
+
+- **Ambiente virtual**: o projeto deve ser desenvolvido dentro de um `venv`. O diretório do ambiente pode ser incluído no `.gitignore`.
+- **Dependências**: todas as bibliotecas de terceiros (incluindo `requests`, `rich` e a biblioteca-tempero atribuída) devem ser listadas em um arquivo `requirements.txt` funcional. Deve ser possível recriar o ambiente com `pip install -r requirements.txt`.
+- **Organização modular**: o código deve estar dividido em múltiplos arquivos `.py`. Pelo menos um módulo deve conter funções reutilizáveis, e o ponto de entrada da aplicação deve ser protegido por `if __name__ == "__main__":`.
+- **Imports**: o código deve demonstrar import de built-ins, import de arquivos locais (módulos do próprio projeto) e import de bibliotecas remotas instaladas via `pip`.
+- **Estruturas de dados**: o uso de **dicionários** é obrigatório em pelo menos uma etapa do fluxo de dados. Listas, tuplas e/ou sets podem ser usados livremente quando convenientes.
+- **Lógica de programação**: o código deve empregar condicionais, loops, operadores lógicos e aritméticos de forma significativa.
+- **Funções**: a lógica deve ser fragmentada em funções com responsabilidades definidas. Evite scripts monolíticos.
+- **Persistência**: todos os trabalhos devem usar **SQLite** para armazenar e consultar dados. O banco pode ser um arquivo `.db` local.
+- **APIs HTTP**: a aquisição de dados externos deve ser feita exclusivamente via `requests.get()` (ou `.post()` quando a API exigir) contra APIs públicas. APIs brasileiras são preferenciais, mas não obrigatórias.
+- **Exibição**: toda a apresentação de dados no terminal deve usar a biblioteca `rich` (tabelas, painéis, cores, progresso, etc.). Evite `print()` simples para saída final de dados estruturados.
+- **Fluxo obrigatório**: o esqueleto lógico esperado é:
+  ```
+  venv → pip install → requirements.txt
+      ↓
+  requests.get() → dicionário
+      ↓
+  normalizar / validar / enriquecer (biblioteca-tempero)
+      ↓
+  SQLite (salvar / consultar)
+      ↓
+  rich (exibir no terminal)
+  ```
+
+> **Restrição importante**: esta especificação descreve **O QUE** o sistema deve fazer e **COMO** deve se comportar em relação às escolhas do usuário. **NÃO descreve COMO implementar no código**. As decisões de implementação (nomes de funções, estruturas internas, algoritmos, tratamento de exceções, etc.) são de responsabilidade exclusiva da dupla.
+
+---
+
+## Trabalho 9 — Tabela FIPE com Valores por Extenso
+**Biblioteca-tempero:** `num2words`  
+**API sugerida:** `https://brasilapi.com.br/api/fipe/preco/v1/{codigoFipe}` (e endpoints auxiliares de marcas/modelos)
+
+### Descrição geral
+Aplicação que consulta preços de veículos na tabela FIPE e converte os valores numéricos para representação por extenso em português. A biblioteca `num2words` deve ser usada para transformar qualquer valor monetário ou inteiro em texto por extenso.
+
+### Menu inicial e comportamento
+
+1. **Consultar preço por código FIPE**  
+   - Solicita o código FIPE (padrão alfanumérico) e o tipo de veículo (carro, moto, caminhão).  
+   - Consulta a API. Se o código for inválido ou não retornar dados, informa o usuário e retorna ao menu.  
+   - Armazena no SQLite: código FIPE, marca, modelo, ano, preço numérico e preço por extenso.  
+   - Exibe em tabela `rich`: veículo, ano, preço numérico e preço por extenso completo.
+
+2. **Listar marcas por tipo**  
+   - Solicita o tipo de veículo.  
+   - Consulta a API de marcas.  
+   - Armazena as marcas no SQLite com uma flag indicando que são metadados de catálogo.  
+   - Exibe em tabela `rich`: código da marca, nome e quantidade de modelos já consultados (se houver histórico).
+
+3. **Listar modelos por marca**  
+   - Solicita o código de uma marca.  
+   - Consulta a API de modelos.  
+   - Armazena no SQLite vinculado à marca.  
+   - Exibe em tabela `rich`: código do modelo, nome e preço médio dos anos já consultados (se houver).
+
+4. **Comparar preços de dois veículos**  
+   - Solicita dois códigos FIPE.  
+   - Consulta ambos (ou recupera do SQLite se já existirem).  
+   - Exibe comparação lado a lado em `rich`: modelo, ano, preço numérico, preço por extenso e diferença absoluta (também por extenso).  
+   - Indica qual é o mais caro e qual é o mais barato.
+
+5. **Histórico de consultas**  
+   - Lista todas as consultas de preço armazenadas no SQLite.  
+   - Permite filtro por tipo de veículo, por marca ou por faixa de preço.  
+   - Exibe em tabela `rich` com todas as colunas, incluindo o preço por extenso.
+
+### Tarefas bônus
+- Adicionar uma opção que converta o preço para extenso em inglês também, exibindo ambos os idiomas.
+- Gerar um "recibo fictício" em texto puro com bordas ASCII contendo os dados do veículo e o valor por extenso, como se fosse um documento oficial.
+- Implementar uma simulação de depreciação: o usuário informa uma porcentagem anual e o sistema projeta o valor do veículo para os próximos 5 anos, convertendo cada valor projetado para extenso.
+
+---
+
+## Trabalho 10 — Validação de Dados Corporativos
+**Biblioteca-tempero:** `validators`  
+**API sugerida:** `https://brasilapi.com.br/api/cnpj/v1/{cnpj}`
+
+### Descrição geral
+Aplicação que consulta dados de empresas pela Receita Federal e valida formatos de dados corporativos antes e após a consulta. A biblioteca `validators` deve ser usada para verificar CNPJ, URLs, endereços de e-mail e outros padrões textuais.
+
+### Menu inicial e comportamento
+
+1. **Validar e consultar CNPJ**  
+   - Solicita um CNPJ (com ou sem máscara).  
+   - Usa a biblioteca-tempero para validar o formato antes de consultar a API. Se inválido, informa imediatamente sem fazer requisição.  
+   - Se válido, consulta a API.  
+   - Armazena no SQLite: CNPJ, razão social, nome fantasia, situação cadastral, data de consulta.  
+   - Exibe em tabela `rich` todos os campos retornados.
+
+2. **Validar site corporativo**  
+   - Solicita uma URL (ex: site da empresa).  
+   - Usa a biblioteca-tempero para validar se a URL está bem formada.  
+   - Se válida, armazena no SQLite com uma flag indicando que foi validada.  
+   - Exibe o resultado da validação e, se possível, extrai o domínio principal.
+
+3. **Validar e-mail de domínio**  
+   - Solicita um endereço de e-mail.  
+   - Usa a biblioteca-tempero para validar formato.  
+   - Se válido, extrai o domínio e verifica se há correspondência com algum site corporativo já validado no SQLite.  
+   - Exibe o resultado e a relação encontrada, se houver.
+
+4. **Listar histórico de validações**  
+   - Exibe todas as validações realizadas (CNPJs, URLs, e-mails) em uma tabela `rich` unificada.  
+   - Permite filtrar por tipo de validação ou por status (válido/inválido).  
+   - Inclui uma coluna de timestamp.
+
+5. **Estatísticas de conformidade**  
+   - Analisa todos os registros do SQLite.  
+   - Calcula: total de CNPJs válidos consultados, total de URLs válidas, total de e-mails válidos, percentual de registros com todos os três tipos de dados validados simultaneamente.  
+   - Exibe em um painel `rich` com múltiplas seções de estatísticas.
+
+### Tarefas bônus
+- Implementar uma "verificação de consistência": se um CNPJ consultado retornar um site e um e-mail, o sistema deve validar ambos e alertar se o domínio do e-mail não corresponder ao domínio do site.
+- Criar um modo de lote: o usuário fornece um arquivo de texto com múltiplos CNPJs (um por linha) e o sistema processa todos, gerando um relatório de validação em tabela `rich`.
+- Implementar uma "pontuação de confiabilidade": cada empresa recebe uma nota de 0 a 100 baseada na quantidade e validade dos dados disponíveis (CNPJ ativo, site válido, e-mail válido, telefone presente, etc.).
+
+---
+
+## Trabalho 11 — Previsão do Tempo com Emojis
+**Biblioteca-tempero:** `emoji`  
+**API sugerida:** `https://api.open-meteo.com/v1/forecast` (API pública global, utilizada para coordenadas de cidades brasileiras)
+
+### Descrição geral
+Aplicação que consulta previsão meteorológica para cidades brasileiras e enriquece a apresentação com emojis representativos das condições climáticas. A biblioteca `emoji` deve ser usada para converter códigos de clima em emojis e para inserir emojis em textos descritivos.
+
+### Menu inicial e comportamento
+
+1. **Previsão atual por cidade**  
+   - Solicita o nome de uma cidade brasileira e o estado (UF).  
+   - Usa coordenadas predefinidas ou consulta-as de forma apropriada.  
+   - Consulta a API de previsão do tempo.  
+   - Interpreta o código de clima retornado e usa a biblioteca-tempero para mapear para um emoji apropriado.  
+   - Armazena no SQLite: cidade, UF, temperatura, condição, emoji, data/hora da consulta.  
+   - Exibe em painel `rich`: cidade, temperatura, sensação térmica (se disponível), condição textual e emoji grande.
+
+2. **Previsão dos próximos dias**  
+   - Solicita cidade/UF e um número de dias `N` (até o limite suportado pela API).  
+   - Consulta a API.  
+   - Para cada dia, mapeia o código de clima para emoji usando a biblioteca-tempero.  
+   - Armazena cada dia como registro individual no SQLite.  
+   - Exibe em tabela `rich`: data, temperatura mínima, máxima, condição e emoji.
+
+3. **Comparar clima entre duas cidades**  
+   - Solicita duas cidades com UF.  
+   - Consulta ambas.  
+   - Exibe comparação lado a lado em `rich`: temperatura atual, condição e emoji de cada cidade.  
+   - Indica qual está mais quente, qual tem mais chance de precipitação e a diferença de temperatura.
+
+4. **Alerta de temperatura extrema**  
+   - Solicita uma cidade/UF e limites de temperatura (mínima e máxima).  
+   - Consulta a previsão atual.  
+   - Se a temperatura estiver fora dos limites, exibe um alerta visual em `rich` com emoji de alerta e a temperatura observada.  
+   - Armazena o alerta no SQLite com status (ativo/resolvido).
+
+5. **Histórico de consultas**  
+   - Lista todas as consultas meteorológicas armazenadas no SQLite.  
+   - Permite filtro por cidade, por data ou por condição climática.  
+   - Exibe em tabela `rich` com todas as colunas, incluindo o emoji associado.
+
+### Tarefas bônus
+- Gerar um "relatório meteorológico em prosa": um parágrafo de texto natural descrevendo a previsão dos próximos dias, intercalado com emojis apropriados, renderizado em um painel `rich`.
+- Criar um "calendário do clima" em ASCII para o mês atual: uma grade onde cada dia exibe o emoji da condição climática mais provável, consultando ou simulando dados.
+- Implementar um "modo viagem": o usuário informa uma rota de cidades (origem, paradas, destino) e o sistema exibe a previsão para cada ponto da rota em uma timeline vertical com emojis.
+
+---
+
+## Trabalho 12 — Gerador de Cadastros Fictícios por Localidade
+**Biblioteca-tempero:** `faker`  
+**API sugerida:** `https://viacep.com.br/ws/{cep}/json/`
+
+### Descrição geral
+Aplicação que consulta endereços reais pelo CEP e gera perfis de pessoas fictícias que residiriam naquele local. A biblioteca `faker` deve ser usada para criar nomes, documentos, telefones, e-mails e outros dados pessoais contextualizados ao Brasil.
+
+### Menu inicial e comportamento
+
+1. **Gerar cadastro por CEP**  
+   - Solicita um CEP (com ou sem hífen).  
+   - Consulta a API. Se inválido, informa e retorna.  
+   - Usa a biblioteca-tempero para gerar um perfil completo: nome, CPF, RG, telefone, e-mail, data de nascimento, profissão.  
+   - Armazena no SQLite vinculando o perfil fictício ao endereço real obtido: CEP, logradouro, bairro, cidade, UF, e todos os dados fictícios gerados.  
+   - Exibe em painel `rich` o perfil completo e o endereço em uma tabela estruturada.
+
+2. **Gerar lote para uma cidade**  
+   - Solicita o nome de uma cidade e UF.  
+   - O sistema deve obter pelo menos um CEP válido para aquela cidade (pode ser via consulta prévia, tabela interna ou outra estratégia).  
+   - Gera `N` cadastros fictícios (quantidade informada pelo usuário) todos vinculados à mesma cidade, mas com endereços de CEPs distintos se possível.  
+   - Armazena todos no SQLite.  
+   - Exibe resumo em `rich`: total gerado, distribuição por bairro (se houver variação) e faixa etária.
+
+3. **Buscar cadastros por bairro**  
+   - Solicita um bairro.  
+   - Consulta o SQLite por perfis fictícios cujo endereço contenha aquele bairro.  
+   - Exibe em tabela `rich`: nome, CPF, endereço completo e telefone.  
+   - Informa o total encontrado.
+
+4. **Exportar lista de cadastros**  
+   - Lista todos os cadastros armazenados.  
+   - Permite filtro por cidade, estado ou faixa etária.  
+   - Exibe em tabela `rich`.  
+   - Oferece a opção de salvar os dados filtrados em um arquivo de texto estruturado (formato livre, desde que legível) no diretório do projeto.
+
+5. **Estatísticas por localidade**  
+   - Analisa todos os cadastros do SQLite.  
+   - Agrupa por cidade/UF.  
+   - Calcula: total de cadastros, média de idade, distribuição por profissão (top 5), distribuição por domínio de e-mail.  
+   - Exibe em painel `rich` com múltiplas seções e tabelas.
+
+### Tarefas bônus
+- Implementar geração de CPFs com dígitos verificadores válidos (algoritmo próprio ou via biblioteca-tempero, se suportado) em vez de CPFs puramente aleatórios.
+- Criar um "cartão de visita digital" em texto puro com bordas ASCII contendo nome, telefone, e-mail e endereço do perfil selecionado.
+- Implementar um "modo censo": o usuário informa uma cidade e o sistema gera uma população fictícia proporcional à população real da cidade (usando uma tabela interna de populações aproximadas), distribuindo idades e profissões de forma pseudo-realista.
+
 ---
 
 ## 10. Tarefas Bônus Gerais
